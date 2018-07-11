@@ -2,7 +2,7 @@
 
 USAGE()
 {
-  echo "usage: $0 [--liveheap][-nz|--nozip][-i|--interval] <pid>"
+  echo "usage: $0 [--liveheap][-nz|--notar][-i|--interval] <pid>"
 }
 
 if [ $# -lt 1 ]; then
@@ -20,7 +20,7 @@ PID="$1"
 while true; do
   case "$1" in
     -i|--interval) SLEEP_TIME="$2"; PID="$3"; shift 1;;
-    -nz|--nozip) CLOSE_COMPRESS=1; PID="$2"; shift;;
+    -nz|--notar) CLOSE_COMPRESS=1; PID="$2"; shift;;
     --liveheap) NEED_HEAP_DUMP=1; PID="$2"; shift;;
     *) break;;
   esac
@@ -148,32 +148,32 @@ START()
 
   # packaging
   if [[ $CLOSE_COMPRESS == 1 ]]; then
-    echo -e "The zip option is closed, no zip package will be generated."
+    echo -e "The tar option is closed, no tar package will be generated."
   else
-    echo -e "$(date '+%Y-%m-%d %H:%M:%S') Begin to zip all files."
-    # zip files without heap dump 
-    ZIP_FILE=${BASEDIR}/vjdump-${PID}-${DATE}.zip
-    zip -j ${ZIP_FILE} ${LOGDIR}/*.log
+    echo -e "$(date '+%Y-%m-%d %H:%M:%S') Begin to tar all files."
+    # tar files without heap dump 
+    TAR_FILE=${BASEDIR}/vjdump-${PID}-${DATE}.tar.gz
+    tar -czf ${TAR_FILE} ${LOGDIR}/*.log
     if [[ $? != 0 ]]; then
-      echo -e "\033[31mzip files error, exit.\033[0m"
+      echo -e "\033[31mtar files error, exit.\033[0m"
       exit -1
     else
-      echo -e "zip files success, the zip file is \033[34m${ZIP_FILE}\033[0m"
+      echo -e "tar files success, the tar file is \033[34m${TAR_FILE}\033[0m"
     fi
-    echo -e "$(date '+%Y-%m-%d %H:%M:%S') Finish to zip all files."
+    echo -e "$(date '+%Y-%m-%d %H:%M:%S') Finish to tar all files."
     
     if [[ $NEED_HEAP_DUMP == 1 ]]; then
       # compress all files
-      echo -e "$(date '+%Y-%m-%d %H:%M:%S') Begin to zip files which include dump file."
-      ZIP_FILE_WITH_HEAP_DUMP=${BASEDIR}/vjdump-with-heap-${PID}-${DATE}.zip
-      zip -j ${ZIP_FILE_WITH_HEAP_DUMP} ${LOGDIR}/*.log ${JMAP_DUMP_FILE}
+      echo -e "$(date '+%Y-%m-%d %H:%M:%S') Begin to tar files which include dump file."
+      TAR_FILE_WITH_HEAP_DUMP=${BASEDIR}/vjdump-with-heap-${PID}-${DATE}.tar.gz
+      tar -czf ${TAR_FILE_WITH_HEAP_DUMP} ${LOGDIR}/*.log ${JMAP_DUMP_FILE}
       if [[ $? != 0 ]]; then
-        echo -e "\033[31mzip files which include dump file error, exit.\033[0m"
+        echo -e "\033[31mtar files which include dump file error, exit.\033[0m"
         exit -1
       else
-        echo -e "zip files which include dump file success, the zip path is \033[34m${ZIP_FILE_WITH_HEAP_DUMP}\033[0m"
+        echo -e "tar files which include dump file success, the tar path is \033[34m${TAR_FILE_WITH_HEAP_DUMP}\033[0m"
       fi
-      echo -e "$(date '+%Y-%m-%d %H:%M:%S') Finish to zip files which include dump file."
+      echo -e "$(date '+%Y-%m-%d %H:%M:%S') Finish to tar files which include dump file."
     fi
   fi
   echo -e "\033[34m$(date '+%Y-%m-%d %H:%M:%S') vjdump finish. \033[0m"
